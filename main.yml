@@ -1,0 +1,33 @@
+---
+
+- name: run the playbook tasks on the localhost
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: installing epel-release
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+    - name: installing the latest version of the packages
+      yum:
+        name: "{{ packages }}"
+        state: latest
+        lock_timeout: 180
+      vars:
+        packages:
+        - htop
+        - vim
+        - ncdu
+        - ecs-init
+
+    - name: |
+        Ensure a job that runs at 04 (08 EST) exists.
+        Creates an cron entry "0 4 * * docker system prune --volumes --force"
+      cron:
+        name: "prune unused docker objects"
+        minute: "0"
+        hour: "04"
+        job: "docker system prune --volumes --force"
