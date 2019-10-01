@@ -21,7 +21,13 @@
         - htop
         - vim
         - ncdu
-        - ecs-init
+    
+    - name: installing the latest ecs-init
+      yum:
+        name: ecs-init
+        state: latest
+        lock_timeout: 180
+      register: ecsinit
 
     - name: |
         Ensure a job that runs at 04 (08 EST) exists.
@@ -31,3 +37,9 @@
         minute: "0"
         hour: "04"
         job: "docker system prune --volumes --force"
+
+    - name: restarting docker if needed
+      service:
+        name: docker
+        state: restarted
+      when: ecsinit.changed
